@@ -30,13 +30,61 @@ public class BST {
         System.out.print(root.val+" ");
         inOrder(root.right);
     }
+
+    static boolean searchKey(Node root, int key){
+        if(root == null)
+            return false;
+        if(key == root.val)
+            return true;
+        if(key > root.val)
+            return searchKey(root.right, key);
+        else
+            return searchKey(root.left, key);
+    }
+
+    static Node findInOrderSuccessor(Node root){
+        while(root.left != null){
+            root = root.left;
+        }
+
+        return root;
+    }
+
+    static Node delete(Node root, int val){
+        if(val > root.val){
+            root.right = delete(root.right, val);
+        }else if(val < root.val){
+            root.left = delete(root.left, val);
+        }else{
+            //case 1: leaf node
+            if(root.left == null && root.right == null)
+                return null; //the node becomes null and it is returned to its parent thus it is deleted
+            
+            //case 2: one child
+            if(root.left == null){
+                    return root.right;
+            }else if(root.right == null){
+                return root.left;
+            }
+
+            //case 3: find inOrderSuccessor
+            Node temp = findInOrderSuccessor(root.right);
+            root.val = temp.val;
+            root.right = delete(root.right, temp.val);
+        }
+
+        return root;
+    }
     public static void main(String[] args) {
-        int [] values = {5,1,3,4,2,7};
+        int [] values = {8,5,3,1,4,6,10,11,14};
         Node root = null;
         for(int i = 0; i < values.length; i++){
             root = insert(root, values[i]);
         }
         inOrder(root);
         System.out.println();
+        System.out.println("Is 4 present in BST: "+searchKey(root, 4));
+        root = delete(root, 5);
+        inOrder(root);
     }
 }
