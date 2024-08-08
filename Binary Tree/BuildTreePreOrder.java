@@ -229,6 +229,17 @@ public class BuildTreePreOrder {
 
             return list.get(list.size()-k-1);
         }
+
+        //Transform to sumTree
+        public static int sumTree(Node root){
+            if(root == null)
+                return 0;
+            int rootValue = root.data;
+            root.data = sumTree(root.left);
+            root.data += sumTree(root.right);
+
+            return rootValue + root.data;
+        } 
     }
     public static void main(String[] args) {
         int nodes[] = {1,2,4,-1,-1,5,-1,-1,3,-1,6,-1,-1};
@@ -253,7 +264,10 @@ public class BuildTreePreOrder {
         rootNode.right = new Node(3);
         rootNode.left.left = new Node(4);
         rootNode.left.right = new Node(5);
-        rootNode.right.right = new Node(6);
+        rootNode.right.right = new Node(7);
+        rootNode.right.left = new Node(6);
+        rootNode.left.left.left = new Node(8);
+        rootNode.left.left.right = new Node(9);
 
         //Tree 2
         Node subRoot = new Node(2);
@@ -266,5 +280,11 @@ public class BuildTreePreOrder {
         BinaryTree.getTopView(root);
         System.out.println();
         System.out.println("2nd ancestor of node 5: "+ BinaryTree.kthAncestor(rootNode, rootNode.left.right, 1).data);
+        System.out.println();
+        System.out.println("Before transforming to sumTree: ");
+        BinaryTree.levelOrderTrav(rootNode);
+        System.out.println("After transforming to sumTree: ");
+        BinaryTree.sumTree(rootNode);
+        BinaryTree.levelOrderTrav(rootNode);
     }
 }
