@@ -73,7 +73,7 @@ public class LinkedList {
             size = 0;
             return val;
         }
-
+        size--;
         int val = head.data;
         head = head.next;
         return val;
