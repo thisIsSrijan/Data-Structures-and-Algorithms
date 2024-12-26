@@ -10,6 +10,7 @@ public class Graph {
             this.weight = w;
         }
     }
+
     public static void bfs(ArrayList<Edge>[] graph){
         boolean[] visited = new boolean[graph.length];
         for(int i = 0; i < graph.length; i++){
@@ -51,7 +52,7 @@ public class Graph {
         for(int i = 0; i < graph[curr].size(); i++){
             Edge e = graph[curr].get(i);
             if(!visited[e.dest]){
-                dfs(graph, e.dest, visited);
+                dfs(graph);
             }
         }
     }
@@ -71,48 +72,255 @@ public class Graph {
 
         return false;
     }
-    public static void main(String[] args) {
-        //we will be using adjacency list to represent the graph
-        //adjacency list will be in form of array of arraylists of type edge
-        
-        //example graph
-        // 0----1
-        // |    |
-        // 2----3
-        //  \  /
-        //   4
 
+    //cycle detection in undirected graph
+    public static boolean isCyclic(ArrayList<Edge>[] graph){
+        boolean[] visited = new boolean[graph.length];
 
-        int V = 5; //number of vertices
-        ArrayList<Edge>[] adj = new ArrayList[V]; //currently all values are null
-
-        //initializing the array of arraylists
-        for(int i=0;i<V;i++){
-            adj[i] = new ArrayList<>();
+        for(int i = 0; i < graph.length; i++){
+            if(!visited[i]){
+                if(isCyclicUtil(graph, visited, i, -1)){
+                    return true;
+                }
+            }
         }
 
-        //adding edges to the graph
-        adj[0].add(new Edge(0,1,1));
-        adj[0].add(new Edge(0,2,1));
-        adj[1].add(new Edge(1,0,1));
-        adj[1].add(new Edge(1,3,1));
-        adj[2].add(new Edge(2,0,1));
-        adj[2].add(new Edge(2,3,1));
-        adj[2].add(new Edge(2,4,1));
-        adj[3].add(new Edge(3,1,1));
-        adj[3].add(new Edge(3,2,1));
-        adj[3].add(new Edge(3,4,1));
-        adj[4].add(new Edge(4,2,1));
-        adj[4].add(new Edge(4,3,1));
+        return false;
+    }
 
-        // //getting the information for vertex 2 neighbours
-        // for(int i = 0; i < adj[2].size(); i++){
-        //     Edge e = adj[2].get(i);
-        //     System.out.println("src: " + e.src + " dest: " + e.dest + " weight: " + e.weight);
-        // }
+    public static boolean isCyclicUtil(ArrayList<Edge>[] graph, boolean[] visited, int curr, int parent){
+        visited[curr] = true;
 
-        bfs(adj);
-        dfs(adj, 0, new boolean[5]);
-        System.out.println(hasPath(adj, 0, 4, new boolean[5]));
+        for(int i = 0; i < graph[curr].size(); i++){
+            Edge e = graph[curr].get(i);
+            
+            if(!visited[e.dest]){ //case3 if the neighbour is not visited and not parent
+                if(isCyclicUtil(graph, visited, e.dest, curr))
+                    return true;
+            }
+            else if(visited[e.dest] && e.dest != parent)
+                return true;
+        }
+
+        return false;
+    }
+
+    //Bipartite Graph
+    public static boolean isBipartite(ArrayList<Edge>[] graph){
+        int color[] = new int[graph.length];
+        Arrays.fill(color, -1);
+
+        for(int i=0; i < graph.length; i++){
+            if(!isBipartiteUtil(graph, i, color))
+                return false;
+        }
+
+        return true;
+    }
+
+    public static boolean isBipartiteUtil(ArrayList<Edge>[] graph, int curr, int color[]){
+        Queue<Integer> q = new java.util.LinkedList<>();
+        q.add(curr);
+
+        while(!q.isEmpty()){
+            int parent = q.remove();
+
+            if(color[parent] == -1)
+                color[parent] = 0;
+
+            for(int i = 0; i < graph[parent].size(); i++){
+                Edge e = graph[parent].get(i);
+
+                //case1: neighbour is uncoloured, assign different colour
+                if(color[e.dest] == -1){
+                    if(color[parent] == 0)
+                        color[e.dest] = 1;
+                    else
+                        color[e.dest] = 0;
+
+                    q.add(e.dest);
+                }else{
+                    if(color[e.dest] == color[parent])
+                        return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    //cycle detection for acyclic graphs
+    public static boolean isCyclic_directed(ArrayList<Edge>[] graph){
+        boolean visited[] = new boolean[graph.length];
+        boolean stack[] = new boolean[graph.length];
+
+        for(int i = 0; i < graph.length; i++){
+            if(!visited[i])
+                if(isCyclic_directedUtil(graph, i, visited, stack))
+                    return true;
+        }
+
+        return false;
+    }
+
+    private static boolean isCyclic_directedUtil(ArrayList<Edge>[] graph, int curr, boolean visited[], boolean stack[]){
+        visited[curr] = true;
+        stack[curr] = true;
+
+        for(int i = 0; i < graph[curr].size(); i++){
+            Edge e = graph[curr].get(i);
+
+            if(stack[e.dest])
+                return true;
+            if(!visited[e.dest] && isCyclic_directedUtil(graph, e.dest, visited, stack))
+                return true;
+        }
+
+        stack[curr] = false;
+        return false;
+    }
+
+    //topological sorting : for DAG
+    public static void topSort(ArrayList<Edge>[] graph){
+        boolean visited[] = new boolean[graph.length];
+        Stack<Integer> stack = new Stack<>();
+
+        for(int i = 0; i < graph.length; i++){
+            if(!visited[i])
+                topSortUtil(graph, i, visited, stack);
+        }
+
+        while(!stack.isEmpty())
+            System.out.print(stack.pop()+" ");
+    }
+
+    private static void topSortUtil(ArrayList<Edge>[] graph, int curr, boolean visited[], Stack<Integer> stack){
+        visited[curr] = true;
+
+        for(int i = 0; i < graph[curr].size(); i++){
+            Edge e = graph[curr].get(i);
+
+            if(!visited[e.dest])
+                topSortUtil(graph, e.dest, visited, stack);
+        }
+
+        stack.push(curr);
+    }
+
+    //topological sort using BFS: Kahn's algo
+    public static void topoSort_bfs(ArrayList<Edge>[] graph){
+        Queue<Integer> q = new LinkedList<>();
+        int indegree[] = findIndegree(graph);
+
+        for(int i = 0; i < indegree.length; i++){
+            if(indegree[i] == 0)
+                q.add(i);
+        }
+
+        while(!q.isEmpty()){
+            int curr = q.remove();
+            System.out.print(curr+" ");
+
+            for(int i = 0; i < graph[curr].size(); i++){
+                Edge e = graph[curr].get(i);
+                if(--indegree[e.dest] == 0)
+                    q.add(e.dest);
+            }
+        }
+    }
+
+    private static int[] findIndegree(ArrayList<Edge>[] graph){
+        int indegree[] = new int[graph.length];
+
+        for(int i = 0; i < graph.length; i++){
+            for(int j = 0 ; j < graph[i].size(); j++){
+                Edge e = graph[i].get(j);
+                indegree[e.dest]++;
+            }
+        }
+
+        return indegree;
+    }
+
+    //Dijkstra's algo
+    static class Pair implements Comparable<Pair>{
+        int node;
+        int path; //distance of node from src
+
+        public Pair(int n, int p){
+            this.node = n;
+            this.path = p;
+        }
+
+        @Override
+        public int compareTo(Pair p){
+            return this.path - p.path; 
+        }
+    }
+
+    public static void getShortestPath(int src, ArrayList<Edge>[] graph){
+        boolean visited[] = new boolean[graph.length];
+        int dist[] = new int[graph.length];
+        PriorityQueue<Pair> pq = new PriorityQueue<>();
+        pq.add(new Pair(src, 0));
+        //initializing all dist = infinity accept the src to src
+        for(int i = 0; i < graph.length; i++){
+            if(src != i)
+                dist[i] = Integer.MAX_VALUE;
+        }
+
+        while(!pq.isEmpty()){
+            Pair curr = pq.remove();
+            if(!visited[curr.node]){
+                visited[curr.node] = true;
+                //neighbours
+                for(int i=0; i<graph[curr.node].size(); i++){
+                    Edge e = graph[curr.node].get(i);
+                    int u = e.src;
+                    int v = e.dest;
+                    int wt = e.weight;
+
+                    if(dist[u] + wt < dist[v]){
+                        dist[v] = dist[u] + wt;
+                        pq.add(new Pair(v, dist[v]));
+                    }
+                }
+            }
+        }
+    }
+
+
+    public static void main(String[] args) {
+        int V = 3; // Number of vertices
+
+        // Cyclic Graph
+        ArrayList<Edge>[] cyclicGraph = new ArrayList[V];
+        for (int i = 0; i < V; i++) {
+            cyclicGraph[i] = new ArrayList<>();
+        }
+
+        cyclicGraph[0].add(new Edge(0, 1, 1));
+        cyclicGraph[0].add(new Edge(1, 2, 1));
+        // cyclicGraph[1].add(new Edge(1, 0, 1));
+        cyclicGraph[1].add(new Edge(2, 0, 1));
+        // cyclicGraph[2].add(new Edge(2, 0, 1));
+        // cyclicGraph[2].add(new Edge(2, 0, 1));
+        // cyclicGraph[3].add(new Edge(3, 1, 1));
+        // cyclicGraph[3].add(new Edge(3, 4, 1));
+        // cyclicGraph[4].add(new Edge(4, 2, 1));
+        // cyclicGraph[4].add(new Edge(4, 3, 1));
+
+        // System.out.println("Cyclic Graph: " + isCyclic(cyclicGraph)); // Expected output: true
+
+        // System.out.println("Bipartite Graph: "+ isBipartite(cyclicGraph));
+
+        // System.out.println("is directed cyclic: "+ isCyclic_directed(cyclicGraph));
+        System.out.println("Topological sort: ");
+        topSort(cyclicGraph);
+        System.out.println();
+        System.out.println("Topological sort using BFS: ");
+        topoSort_bfs(cyclicGraph);
+
+        // getShortestPath(0, cyclicGraph);
     }
 }

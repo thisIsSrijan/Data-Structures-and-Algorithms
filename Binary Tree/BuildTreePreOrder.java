@@ -132,8 +132,8 @@ public class BuildTreePreOrder {
             TreeInfo left = getDiameter(root.left);
             TreeInfo right = getDiameter(root.right);
             int selfHt = Math.max(left.ht, right.ht) + 1;
-
-            return new TreeInfo(Math.max(left.dia, right.dia), selfHt);
+            int selfDia = Math.max(Math.max(left.dia, right.dia), left.ht+right.ht+1);
+            return new TreeInfo(selfDia, selfHt);
         }
 
         //check if given tree is a subtree of another tree

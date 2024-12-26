@@ -9,7 +9,7 @@ public class HeapCode {
         public void add(int data){
             arr.add(data);
             int x = arr.size()-1;
-            int parent = (arr.size() - 2)/2;
+            int parent = (arr.size() - 2)/2; //((arr.size()-1)-1))/2
 
             while(arr.get(x) < arr.get(parent) && x > 0 && parent >= 0){
                 int temp = arr.get(x);
@@ -43,7 +43,7 @@ public class HeapCode {
                 heapify(minIdx);
             }
         }
-        
+         
         public int remove(){
             //swap first and last element and remove the last element
             int temp = arr.remove(arr.size()-1);

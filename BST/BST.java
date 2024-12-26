@@ -64,7 +64,7 @@ public class BST {
             
             //case 2: one child
             if(root.left == null){
-                    return root.right;
+                return root.right;
             }else if(root.right == null){
                 return root.left;
             }
