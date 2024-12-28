@@ -242,7 +242,7 @@ public class Graph {
         return indegree;
     }
 
-    //Dijkstra's algo
+    //Dijkstra's algo : fails for negative weight edges 
     static class Pair implements Comparable<Pair>{
         int node;
         int path; //distance of node from src
@@ -289,6 +289,77 @@ public class Graph {
         }
     }
 
+    //BellmanFord algorithm: O(V*E)
+    public static void bellman_ford(ArrayList<Edge>[] graph, int src){
+        int V = graph.length;
+        int dist[] = new int[V];
+
+        for(int i = 0; i < dist.length; i++){
+            if(i!= src)
+                dist[i] = Integer.MAX_VALUE;
+        }
+
+        for(int i = 0; i < V-1; i++){ //O(V)
+            for(int j = 0; j < graph.length; j++){ //O(E)
+                for(int k = 0; k < graph[j].size(); k++){
+                    Edge e = graph[j].get(k);
+                    int u = e.src;
+                    int v = e.dest;
+                    int wt = e.weight;
+
+                    if(dist[u] != Integer.MAX_VALUE && dist[u] + wt < dist[v]){
+                        dist[v] = dist[u] + wt;
+                    }
+                }
+            }
+        }
+
+        for(int i = 0; i < dist.length; i++)
+            System.out.print(dist[i]+" ");
+    }
+
+    // MST: Prim's algorithm
+    static class MSTPair implements Comparable<MSTPair>{
+        int vertex;
+        int cost;
+
+        public MSTPair(int v, int c){
+            this.vertex = v;
+            this.cost = c;
+        }
+
+        @Override
+        public int compareTo(MSTPair p){
+            return this.cost - p.cost;
+        }
+
+    }
+    public static void find_mst(ArrayList<Edge>[] graph){
+        boolean visited[] = new boolean[graph.length];
+        ArrayList<MSTPair> mst = new ArrayList<>(); //for storing the mst pairs and printing the edges
+        PriorityQueue<MSTPair> pq = new PriorityQueue<>();
+        pq.add(new MSTPair(0, 0)); //add 0th vertex intially
+
+        while(!pq.isEmpty()){
+            MSTPair curr = pq.poll();
+            if(!visited[curr.vertex]){
+                visited[curr.vertex] = true;
+                mst.add(curr);
+                for(int i = 0; i < graph[curr.vertex].size(); i++){
+                    Edge e = graph[curr.vertex].get(i);
+                    pq.add(new MSTPair(e.dest, e.weight));
+                }
+            }
+        }
+
+        int min_cost = 0;
+        for(MSTPair p: mst){
+            min_cost += p.cost;
+        }
+
+        System.out.println("minimum cost tree: "+min_cost);
+    }
+    
 
     public static void main(String[] args) {
         int V = 3; // Number of vertices
@@ -301,26 +372,12 @@ public class Graph {
 
         cyclicGraph[0].add(new Edge(0, 1, 1));
         cyclicGraph[0].add(new Edge(1, 2, 1));
-        // cyclicGraph[1].add(new Edge(1, 0, 1));
         cyclicGraph[1].add(new Edge(2, 0, 1));
-        // cyclicGraph[2].add(new Edge(2, 0, 1));
-        // cyclicGraph[2].add(new Edge(2, 0, 1));
-        // cyclicGraph[3].add(new Edge(3, 1, 1));
-        // cyclicGraph[3].add(new Edge(3, 4, 1));
-        // cyclicGraph[4].add(new Edge(4, 2, 1));
-        // cyclicGraph[4].add(new Edge(4, 3, 1));
 
-        // System.out.println("Cyclic Graph: " + isCyclic(cyclicGraph)); // Expected output: true
-
-        // System.out.println("Bipartite Graph: "+ isBipartite(cyclicGraph));
-
-        // System.out.println("is directed cyclic: "+ isCyclic_directed(cyclicGraph));
         System.out.println("Topological sort: ");
         topSort(cyclicGraph);
         System.out.println();
         System.out.println("Topological sort using BFS: ");
         topoSort_bfs(cyclicGraph);
-
-        // getShortestPath(0, cyclicGraph);
     }
 }
