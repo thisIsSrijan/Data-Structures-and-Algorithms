@@ -46,15 +46,15 @@ public class Graph {
     }
     
     public static void dfsUtil(ArrayList<Edge>[] graph, int curr, boolean visited[]){
-        System.out.println(curr);
         visited[curr] = true;
-
+        
         for(int i = 0; i < graph[curr].size(); i++){
             Edge e = graph[curr].get(i);
             if(!visited[e.dest]){
-                dfs(graph);
+                dfsUtil(graph, e.dest, visited);
             }
         }
+        System.out.print(curr+" ");
     }
 
     public static boolean hasPath(ArrayList<Edge>[] graph, int curr, int dest, boolean visited[]){
@@ -98,7 +98,7 @@ public class Graph {
                 if(isCyclicUtil(graph, visited, e.dest, curr))
                     return true;
             }
-            else if(visited[e.dest] && e.dest != parent)
+            else if(visited[e.dest] && e.dest != parent) //case1: if the neighbour is visited and not parent
                 return true;
         }
 
@@ -126,7 +126,7 @@ public class Graph {
             int parent = q.remove();
 
             if(color[parent] == -1)
-                color[parent] = 0;
+                color[parent] = 0; //for intial vertex
 
             for(int i = 0; i < graph[parent].size(); i++){
                 Edge e = graph[parent].get(i);
@@ -149,7 +149,7 @@ public class Graph {
         return true;
     }
 
-    //cycle detection for acyclic graphs
+    //cycle detection for directed graphs
     public static boolean isCyclic_directed(ArrayList<Edge>[] graph){
         boolean visited[] = new boolean[graph.length];
         boolean stack[] = new boolean[graph.length];
@@ -359,10 +359,69 @@ public class Graph {
 
         System.out.println("minimum cost tree: "+min_cost);
     }
-    
+
+    //Kosaraju Algorithm for strongly connected components
+    public static Stack<Integer> getTopSortStack(ArrayList<Edge>[] graph){
+        boolean visited[] = new boolean[graph.length];
+        Stack<Integer> stack = new Stack<>();
+
+        for(int i = 0; i < graph.length; i++){
+            if(!visited[i])
+                getTopSortStack_util(graph, i, visited, stack);
+        }
+
+        return stack;
+    }
+
+    private static void getTopSortStack_util(ArrayList<Edge>[] graph, int curr, boolean visited[], Stack<Integer> stack){
+        visited[curr] = true;
+
+        for(int i = 0; i < graph[curr].size(); i++){
+            Edge e = graph[curr].get(i);
+
+            if(!visited[e.dest])
+                topSortUtil(graph, e.dest, visited, stack);
+        }
+
+        stack.push(curr);
+    }
+
+    public static void printScc(ArrayList<Edge>[] graph){
+        Stack<Integer> s = getTopSortStack(graph);
+        ArrayList<Edge>[] transpose =  new ArrayList[graph.length];
+
+        for(int i = 0; i < graph.length; i++){
+            transpose[i] = new ArrayList<Edge>();
+        }
+        //transposing the graph
+        for(int i = 0; i < graph.length; i++){
+
+            for(Edge x: graph[i]){
+                transpose[x.dest].add(new Edge(x.dest, x.src, 1));
+            }
+        }
+        boolean visited[] = new boolean[graph.length];
+        while(!s.isEmpty()){
+            int curr = s.pop();
+            if(!visited[curr]){
+                printScc_util(transpose, visited, curr);
+                System.out.println();
+            }
+        }
+    }
+
+    private static void printScc_util(ArrayList<Edge>[] graph, boolean visited[], int cur){
+        visited[cur] = true;
+        System.out.print(cur+" ");
+
+        for(int i=0; i<graph[cur].size(); i++){
+            if(!visited[graph[cur].get(i).dest])   
+                printScc_util(graph, visited, graph[cur].get(i).dest);
+        }
+    }
 
     public static void main(String[] args) {
-        int V = 3; // Number of vertices
+        int V = 5; // Number of vertices
 
         // Cyclic Graph
         ArrayList<Edge>[] cyclicGraph = new ArrayList[V];
@@ -370,14 +429,18 @@ public class Graph {
             cyclicGraph[i] = new ArrayList<>();
         }
 
-        cyclicGraph[0].add(new Edge(0, 1, 1));
-        cyclicGraph[0].add(new Edge(1, 2, 1));
-        cyclicGraph[1].add(new Edge(2, 0, 1));
-
-        System.out.println("Topological sort: ");
-        topSort(cyclicGraph);
-        System.out.println();
-        System.out.println("Topological sort using BFS: ");
-        topoSort_bfs(cyclicGraph);
+        cyclicGraph[0].add(new Edge(0, 3, 1));
+        cyclicGraph[0].add(new Edge(0, 2, 1));
+        cyclicGraph[1].add(new Edge(1, 0, 1));
+        cyclicGraph[2].add(new Edge(2, 1, 1));
+        cyclicGraph[3].add(new Edge(3, 4, 1));
+        
+        // dfs(cyclicGraph);
+        // System.out.println("Topological sort: ");
+        // topSort(cyclicGraph);
+        // System.out.println();
+        // System.out.println("Topological sort using BFS: ");
+        // topoSort_bfs(cyclicGraph);
+        printScc(cyclicGraph);
     }
 }
