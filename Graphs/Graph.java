@@ -420,6 +420,41 @@ public class Graph {
         }
     }
 
+    //Tarjan's Algo for finding bridge in undirected graphs
+    private static int TIME = 0;
+    public static void find_bridge(ArrayList<Edge>[] graph){
+        int V = graph.length;
+        boolean visited[] = new boolean[V];
+        int dt[] = new int[V];
+        int low[] = new int[V];
+
+        for(int i = 0; i < V; i++){
+            if(!visited[i]){
+                find_bridge_util(graph,visited,dt,low,i, -1);
+            }
+        }
+    }
+
+    private static void find_bridge_util(ArrayList<Edge>[] graph, boolean visited[], int dt[], int low[], int curr, int parent){
+        visited[curr] = true;
+        dt[curr] = low[curr] = ++TIME;
+
+        for(int i = 0; i < graph[curr].size(); i++){
+            Edge e = graph[curr].get(i);
+            if(e.dest == parent)
+                continue;
+            else if(visited[e.dest])
+                low[curr] = Math.min(low[curr], dt[e.dest]);
+            else{
+                find_bridge_util(graph, visited, dt, low, e.dest, curr);
+                low[curr] = Math.min(low[curr], low[e.dest]);
+                if(dt[curr] < low[e.dest]){
+                    System.out.println("Bridge edge is: "+curr+" ---> "+e.dest);
+                }
+            }
+        }
+    }
+
     public static void main(String[] args) {
         int V = 5; // Number of vertices
 
@@ -429,11 +464,17 @@ public class Graph {
             cyclicGraph[i] = new ArrayList<>();
         }
 
-        cyclicGraph[0].add(new Edge(0, 3, 1));
+        //undirected acyclic graph
+        cyclicGraph[0].add(new Edge(0, 1, 1));
         cyclicGraph[0].add(new Edge(0, 2, 1));
+        cyclicGraph[0].add(new Edge(0, 3, 1));
         cyclicGraph[1].add(new Edge(1, 0, 1));
+        cyclicGraph[1].add(new Edge(1, 2, 1));
+        cyclicGraph[2].add(new Edge(2, 0, 1));
         cyclicGraph[2].add(new Edge(2, 1, 1));
+        cyclicGraph[3].add(new Edge(3, 0, 1));
         cyclicGraph[3].add(new Edge(3, 4, 1));
+        cyclicGraph[4].add(new Edge(4, 3, 1));
         
         // dfs(cyclicGraph);
         // System.out.println("Topological sort: ");
@@ -441,6 +482,7 @@ public class Graph {
         // System.out.println();
         // System.out.println("Topological sort using BFS: ");
         // topoSort_bfs(cyclicGraph);
-        printScc(cyclicGraph);
+        // printScc(cyclicGraph);
+        find_bridge(cyclicGraph);
     }
 }
