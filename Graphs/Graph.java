@@ -455,6 +455,53 @@ public class Graph {
         }
     }
 
+    //articulation points in undirected graph using tarjan's algorithm
+    public static void getArticulationPoint(ArrayList<Edge>[] graph){
+        int V = graph.length;
+        boolean visited[] = new boolean[V];
+        boolean points[] = new boolean[V];
+        int dt[] = new int[V];
+        int low[] = new int[V];
+        int time = 0;
+
+        for(int i = 0; i < V; i++){
+            if(!visited[i]){
+                getAtriculation_util(graph,visited,points,dt,low,i, -1,time);
+            }
+        }
+
+        for(int i=0; i < points.length; i++){
+            if(points[i])
+                System.out.print(i+" ");
+        }
+    }
+
+    private static void getAtriculation_util(ArrayList<Edge>[] graph, boolean visited[], boolean points[],int dt[], int low[], int curr, int parent, int time){
+        visited[curr] = true;
+        dt[curr] = low[curr] = ++time;
+        int child = 0;
+
+        for(int i = 0; i < graph[curr].size(); i++){
+            Edge e = graph[curr].get(i);
+
+            if(e.dest == parent)
+                continue;
+            else if(visited[e.dest]){
+                low[curr] = Math.min(low[curr], dt[e.dest]);
+            }else if(!visited[e.dest]){
+                getAtriculation_util(graph, visited, points, dt, low, e.dest, curr, time);
+                low[curr] = Math.min(low[curr], low[e.dest]);
+                if(dt[curr] <= low[e.dest] && parent != -1){
+                    points[curr] = true;
+                }
+                child++;
+            }
+        }
+
+        if(parent == -1 && child > 1)
+            points[curr] = true;
+    }
+    
     public static void main(String[] args) {
         int V = 5; // Number of vertices
 
@@ -483,6 +530,7 @@ public class Graph {
         // System.out.println("Topological sort using BFS: ");
         // topoSort_bfs(cyclicGraph);
         // printScc(cyclicGraph);
-        find_bridge(cyclicGraph);
+        // find_bridge(cyclicGraph);
+        getArticulationPoint(cyclicGraph);
     }
 }
