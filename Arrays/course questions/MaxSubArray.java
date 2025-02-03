@@ -25,7 +25,7 @@ public class MaxSubArray {
     public static int calcMaxSumPA(int arr[]){
         int prefixArr[] = new int[arr.length];
         prefixArr[0] = arr[0];
-        for(int i=1;i<arr.length;i++){
+        for(int i=1;i<arr.length;i++){ 
             prefixArr[i] = prefixArr[i-1]+ arr[i];
         }
 
