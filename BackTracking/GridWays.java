@@ -26,7 +26,7 @@ public class GridWays {
     }
     public static void main(String[] args) {
         // long res = findGridWays((int)Math.pow(10, 2),(int)Math.pow(10, 2) , 0, 0);
-        long res = findGridWaysOpti(5, 5);
+        long res = findGridWaysOpti(100, 5);
         System.out.println(res);
     }
 }
