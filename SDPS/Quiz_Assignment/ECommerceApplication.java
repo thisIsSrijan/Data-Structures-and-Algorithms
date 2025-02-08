@@ -1,126 +1,109 @@
-//22ucs212
-//Srijan Das
+// //22ucs212
+// //Srijan Das
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
-//--------------- Databases ---------------
-
-// Interface for Database operations
+// ------- Database Layer -------
 interface Database {
+
     void connect();
 }
 
-// UsersDB extending Database interface
 class UsersDB implements Database {
+
     public void connect() {
         System.out.println("Connected to Users Database.");
     }
 }
 
-// ProductDB extending Database interface
 class ProductDB implements Database {
+
     public void connect() {
         System.out.println("Connected to Products Database.");
     }
 }
 
-//-------------- User --------------
+// ------- User Role Interfaces -------
+interface Verifiable {
 
-// Interface for User
-interface UserRole {
     void verifyUser(Database db);
+}
+
+interface ProfileUpdatable {
+
     void updateProfile(String address, String phone, String email);
+}
+
+interface Authenticatable {
+
     void login();
 }
 
-// Customer class
-class Customer implements UserRole {
-    private String id;
-    private String address;
-    private String phone;
-    private String email;
-    private Cart cart;
+// ------- User Classes -------
+abstract class User implements Verifiable, ProfileUpdatable, Authenticatable {
 
-    //Register a customer
-    public Customer(String id, String address, String phone, String email) {
+    protected String id, address, phone, email;
+
+    public User(String id, String address, String phone, String email) {
         this.id = id;
         this.address = address;
         this.phone = phone;
         this.email = email;
-        this.cart = new Cart();
-        System.out.println("Customer created successfully.");
     }
 
     public void verifyUser(Database db) {
         db.connect();
-        System.out.println("Verifying customer ID: " + id);
+        System.out.println("Verifying user ID: " + id);
     }
 
     public void updateProfile(String address, String phone, String email) {
         this.address = address;
         this.phone = phone;
         this.email = email;
-        System.out.println("Customer profile updated successfully.");
-    }
-
-    public void login() {
-        System.out.println("Customer: "+this.id+" logged in successfully.");
-    }
-
-    public Cart getCart() {
-        return cart;
+        System.out.println("Profile updated successfully.");
     }
 }
 
-//Seller class
-class Seller implements UserRole {
-    private String id;
-    private String address;
-    private String phone;
-    private String email;
-    private ArrayList<Product> products; //Products sold by seller
+class Customer extends User {
 
-    //Register a seller
-    public Seller(String id, String address, String phone, String email) {
-        this.id = id;
-        this.address = address;
-        this.phone = phone;
-        this.email = email;
-        this.products = new ArrayList<>();
-        System.out.println("Seller created successfully.");
-    }
+    private Cart cart = new Cart();
 
-    public void verifyUser(Database db) {
-        db.connect();
-        System.out.println("Verifying seller ID: " + id);
-    }
-
-    public void updateProfile(String address, String phone, String email) {
-        this.address = address;
-        this.phone = phone;
-        this.email = email;
-        System.out.println("Seller profile updated successfully.");
+    public Customer(String id, String address, String phone, String email) {
+        super(id, address, phone, email);
     }
 
     public void login() {
-        System.out.println("Seller "+this.id+" logged in successfully.");
+        System.out.println("Customer " + this.id + " logged in.");
+    }
+
+    public Cart getCart() {
+        return this.cart;
+    }
+}
+
+class Seller extends User {
+
+    private List<Product> products = new ArrayList<>();
+
+    public Seller(String id, String address, String phone, String email) {
+        super(id, address, phone, email);
+    }
+
+    public void login() {
+        System.out.println("Seller " + this.id + " logged in.");
     }
 
     public void addProduct(Product product) {
         products.add(product);
-        System.out.println("Product added successfully by seller.");
+        System.out.println("Product added successfully by seller: "+this.id);
     }
 }
 
-//------- Products ---------
+// ------- Product Class -------
 class Product {
-    private String productId;
-    private String name;
-    private String sellerId;
-    private int cost;
-    private int stockUnits;
+
+    private String productId, name, sellerId;
+    private int cost, stockUnits;
 
     public Product(String productId, String name, String sellerId, int cost, int stockUnits) {
         this.productId = productId;
@@ -131,119 +114,77 @@ class Product {
     }
 
     public void addToCart(Cart cart) {
-        if(stockUnits > 0){
+        if (stockUnits > 0) {
             cart.addProduct(this);
             stockUnits--;
-        }else{
-            System.out.println("product out of stock!");
-        }
-    }
-
-    public void getDetails() {
-        System.out.println("Product ID: " + productId + ", Name: " + name + ", Price: $" + cost);
-    }
-
-    //for direct buying without adding to cart
-    public void buy(Customer customer) {
-        if (stockUnits > 0) {
-            stockUnits--;
-            Payment payment = new Payment();
-            String orderId = UUID.randomUUID().toString();
-
-            Order order = new Order(payment, orderId, customer, cost);
-            order.placeOrder();
-
-            System.out.println("Product purchased successfully! Order ID: " + orderId);
         } else {
-            System.out.println("Out of stock! Unable to purchase.");
+            System.out.println("Product out of stock!");
         }
     }
 
     public void getProductDetails() {
-        System.out.println(this.name+" : "+this.cost);
+        System.out.println(this.name + " : " + this.cost);
     }
 
-    public int getCost(){
+    public int getCost() {
         return this.cost;
     }
 }
 
-//------- Cart -------
+// ------- Cart Class -------
 class Cart {
-    private ArrayList<Product> products;
-    private int totalItems;
-    private int totalCost;
 
-    public Cart() {
-        this.products = new ArrayList<>();
-    }
+    private List<Product> products = new ArrayList<>();
+    private int totalCost;
 
     public void addProduct(Product product) {
         products.add(product);
-        totalItems++;
         totalCost += product.getCost();
         System.out.println("Product added to cart.");
     }
 
-    public void checkout(Payment payment, Customer customer) {
+    public void checkout(PaymentProcessor paymentProcessor, Customer customer) {
         if (products.isEmpty()) {
             System.out.println("Cart is empty. Add products before checkout.");
             return;
         }
 
-        String orderId = UUID.randomUUID().toString();
-        Order order = new Order(payment, orderId, customer, totalCost);
+        Order order = new Order(paymentProcessor, UUID.randomUUID().toString(), customer, totalCost);
         order.placeOrder();
-        products.clear();
-        totalItems = 0;
-        totalCost = 0;
-    }
-
-    public void viewCart() {
-        System.out.println("Cart contains " + totalItems + " items. Total cost: Rs. " + totalCost);
     }
 }
 
-//---------- Payment ----------
-class Payment {
-    private String transactionId;
-    private String orderId;
-    private boolean paid;
-    private int total;
-    private Date date;
+// ------- Payment Processing -------
+interface PaymentProcessor {
 
-    public Payment() {
-        this.transactionId = UUID.randomUUID().toString();
-        this.date = new Date();
-    }
+    void processPayment(int amount);
+}
 
-    public void sendOTP() {
-        System.out.println("OTP sent for transaction verification.");
-    }
+class CreditCardPayment implements PaymentProcessor {
 
-    public void confirmTransaction() {
-        paid = true;
-        System.out.println("Transaction confirmed successfully.");
-    }
-
-    public void makeTransaction(int totalAmount) {
-        this.total = totalAmount;
-        sendOTP();
-        confirmTransaction();
-        System.out.println("Transaction ID: " + transactionId + ", Amount: Rs." + total);
+    public void processPayment(int amount) {
+        System.out.println("Processing credit card payment of Rs. " + amount);
     }
 }
 
-//Order class associated with Payment class
+class UpiPayment implements PaymentProcessor {
+
+    public void processPayment(int amount) {
+        System.out.println("Processing UPI payment of Rs. " + amount);
+    }
+}
+
+// ------- Order Class -------
 class Order {
-    private Payment payment;
+
+    private PaymentProcessor paymentProcessor;
     private String orderId;
     private Customer customer;
     private int totalAmount;
     private String status;
 
-    public Order(Payment payment, String orderId, Customer customer, int totalAmount) {
-        this.payment = payment;
+    public Order(PaymentProcessor paymentProcessor, String orderId, Customer customer, int totalAmount) {
+        this.paymentProcessor = paymentProcessor;
         this.orderId = orderId;
         this.customer = customer;
         this.totalAmount = totalAmount;
@@ -252,7 +193,7 @@ class Order {
 
     public void placeOrder() {
         System.out.println("Order placed successfully. Order ID: " + orderId);
-        payment.makeTransaction(totalAmount);
+        paymentProcessor.processPayment(totalAmount);
         this.status = "Completed";
     }
 
@@ -265,29 +206,28 @@ class Order {
     }
 }
 
-//UI
+// ------- UI Class -------
 class UserApplicationUI {
+
     public void displayUI() {
         System.out.println("User Interface Loaded.");
     }
 }
 
-
+// ------- Main Application -------
 public class ECommerceApplication {
+
     public static void main(String[] args) {
         UserApplicationUI ui = new UserApplicationUI();
         ui.displayUI();
 
         Database userDb = new UsersDB();
-        Database productDb = new ProductDB();
 
-        //Creating a customer and verifying user
-        Customer customer = new Customer("C001", "123 Street", "9999999999", "customer@example.com");
+        Customer customer = new Customer("C001", "C scheme, Rajasthan", "9999999999", "customer@gmail.com");
         customer.verifyUser(userDb);
         customer.login();
 
-        //Creating a seller and adding products
-        Seller seller = new Seller("S001", "456 Avenue", "8888888888", "seller@example.com");
+        Seller seller = new Seller("S001", "Palika Bazar, Delhi", "8888888888", "seller@gmail.com");
         seller.verifyUser(userDb);
         seller.login();
 
@@ -297,14 +237,11 @@ public class ECommerceApplication {
         seller.addProduct(product1);
         seller.addProduct(product2);
 
-        //Customer adding products to cart
         Cart cart = customer.getCart();
         product1.addToCart(cart);
         product2.addToCart(cart);
-        cart.viewCart();
 
-        //Checkout process
-        Payment payment = new Payment();
-        cart.checkout(payment, customer);
+        PaymentProcessor paymentProcessor = new CreditCardPayment();
+        cart.checkout(paymentProcessor, customer);
     }
 }
