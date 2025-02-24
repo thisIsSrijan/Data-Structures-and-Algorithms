@@ -151,13 +151,16 @@ public class BuildTreePreOrder {
         }
 
         public static boolean isSubTree(Node root, Node subRoot){
+            if(root == null && subRoot != null)
+                return false;
+
             if(root.data == subRoot.data){
                 if(isIdentical(root, subRoot))
                     return true;
             }
 
-            boolean left = isIdentical(root.left, subRoot);
-            boolean right = isIdentical(root.right, subRoot);
+            boolean left = isSubTree(root.left, subRoot);
+            boolean right = isSubTree(root.right, subRoot);
             return left || right;
         }
 
@@ -227,7 +230,7 @@ public class BuildTreePreOrder {
             ArrayList<Node> list = new ArrayList<>();
             getAncestors(root, n, list);
 
-            return list.get(list.size()-k-1);
+            return list.get(list.size()-k-1);2
         }
 
         //Transform to sumTree
@@ -266,8 +269,8 @@ public class BuildTreePreOrder {
         rootNode.left.right = new Node(5);
         rootNode.right.right = new Node(7);
         rootNode.right.left = new Node(6);
-        rootNode.left.left.left = new Node(8);
-        rootNode.left.left.right = new Node(9);
+//        rootNode.left.left.left = new Node(8);
+//        rootNode.left.left.right = new Node(9);
 
         //Tree 2
         Node subRoot = new Node(2);

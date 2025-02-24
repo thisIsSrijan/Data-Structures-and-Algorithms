@@ -179,14 +179,14 @@ class Order {
 
     private PaymentProcessor paymentProcessor;
     private String orderId;
-    private Customer customer;
+    private User user;
     private int totalAmount;
     private String status;
 
-    public Order(PaymentProcessor paymentProcessor, String orderId, Customer customer, int totalAmount) {
+    public Order(PaymentProcessor paymentProcessor, String orderId, User user, int totalAmount) {
         this.paymentProcessor = paymentProcessor;
         this.orderId = orderId;
-        this.customer = customer;
+        this.user = user;
         this.totalAmount = totalAmount;
         this.status = "Pending";
     }

@@ -26,6 +26,8 @@ public class Bit {
         return (n & ~(1<<i)) | (v<<i); //left shift 1 by i, do bitwise not, do bitwise and with n, left shift v by i, do bitwise or with n
     }
     public static void main(String[] args) {
-        
+        String bing = "1010";
+        int n = Integer.parseInt(bing, 2);
+        System.out.println(n); //1
     }
 }
