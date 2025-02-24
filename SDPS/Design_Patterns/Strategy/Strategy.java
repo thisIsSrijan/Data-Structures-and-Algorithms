@@ -1,4 +1,4 @@
-package Design_Patterns;
+package Design_Patterns.Strategy;
 
 public class Strategy {
     // PaymentStrategy Interface (Abstract Strategy)

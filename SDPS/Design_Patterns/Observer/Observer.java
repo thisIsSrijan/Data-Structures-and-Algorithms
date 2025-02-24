@@ -1,4 +1,4 @@
-package Design_Patterns;
+package Design_Patterns.Observer;
 
 import java.util.ArrayList;
 import java.util.List;
