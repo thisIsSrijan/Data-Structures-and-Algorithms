@@ -21,6 +21,7 @@ abstract class animal{
 }
 
 class Cat extends animal{
+    protected int data;
     public static void walk(){
         System.out.println("cat walks 1 step");
     }
@@ -38,5 +39,7 @@ public class Polymorphism{
         Cat obj = new Cat();
         obj.walk();
         obj.eat();
+        obj.data = 10;
+        System.out.println(obj.data);
     }
 }

@@ -230,7 +230,7 @@ public class BuildTreePreOrder {
             ArrayList<Node> list = new ArrayList<>();
             getAncestors(root, n, list);
 
-            return list.get(list.size()-k-1);2
+            return list.get(list.size()-k-1);
         }
 
         //Transform to sumTree
