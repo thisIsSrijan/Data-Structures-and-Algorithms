@@ -276,8 +276,8 @@ public class Graph {
                 //neighbours
                 for(int i=0; i<graph[curr.node].size(); i++){
                     Edge e = graph[curr.node].get(i);
-                    int u = e.src;
-                    int v = e.dest;
+                    int u = e.src; //current node
+                    int v = e.dest; //neighbours
                     int wt = e.weight;
 
                     if(dist[u] + wt < dist[v]){
@@ -297,7 +297,7 @@ public class Graph {
         for(int i = 0; i < dist.length; i++){
             if(i!= src)
                 dist[i] = Integer.MAX_VALUE;
-        }
+        } 
 
         for(int i = 0; i < V-1; i++){ //O(V)
             for(int j = 0; j < graph.length; j++){ //O(E)
@@ -338,7 +338,7 @@ public class Graph {
         boolean visited[] = new boolean[graph.length];
         ArrayList<MSTPair> mst = new ArrayList<>(); //for storing the mst pairs and printing the edges
         PriorityQueue<MSTPair> pq = new PriorityQueue<>();
-        pq.add(new MSTPair(0, 0)); //add 0th vertex intially
+        pq.add(new MSTPair(0, 0)); //add 0th vertex intially (it's a false edge therefore cost is 0)
 
         while(!pq.isEmpty()){
             MSTPair curr = pq.poll();
